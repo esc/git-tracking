@@ -14,38 +14,58 @@ elif [[ $BRANCH == '(no branch)' ]] ; then
     exit 2
 fi
 REMOTE=$( git config branch.$BRANCH.remote )
+
+#if [[ -n $REMOTE && -n $( git config branch.$BRANCH.merge) ]] ; then
+#    remote_ahead_local=$( git log --oneline $BRANCH..$REMOTE/$BRANCH)
+#    local_ahead_remote=$( git log --oneline $REMOTE/$BRANCH..$BRANCH)
+#    if [[ -z $remote_ahead_local && -z $local_ahead_remote ]] ; then
+#            if [[ $( git rev-parse $BRANCH )  == $( git rev-parse $REMOTE/$BRANCH ) ]] ; then
+#                echo "Your branch '$BRANCH' points to same commit as '$REMOTE/$BRANCH', doing nothing."
+#                exit 4
+#            else
+#                echo "Dude..."
+#                exit 42
+#            fi
+#    fi
+#    if [[ -z $remote_ahead_local && -n $local_ahead_remote ]] ; then
+#        echo "Your branch '$BRANCH'is ahead of '$REMOTE/$BRANCH', perhaps you want to push?"
+#        exit 5
+#    fi
+#    if [[ -n $local_ahead_remote && -n $remote_ahead_local ]] ; then
+#        echo "Your branches '$BRANCH' and '$REMOTE/$BRANCH' and have diverged, fast-forward not possible!"
+#        exit 6
+#    fi
+#    if [[ -n $remote_ahead_local && -z $local_ahead_remote ]] ; then
+#        echo "Fast-forward '$BRANCH' to '$REMOTE/$BRANCH'."
+#        git merge --ff-only $REMOTE/$BRANCH
+#        exit 0
+#    fi
+#fi
+
+check_tracking (){
 if [[ -n $BRANCH && -z $REMOTE ]] ; then
     echo "Your branch '$BRANCH' isn't tracking anything."
     exit 3
-elif [[ -n $REMOTE && -n $( git config branch.$BRANCH.merge) ]] ; then
-    remote_ahead_local=$( git log --oneline $BRANCH..$REMOTE/$BRANCH)
-    local_ahead_remote=$( git log --oneline $REMOTE/$BRANCH..$BRANCH)
-    if [[ -z $remote_ahead_local && -z $local_ahead_remote ]] ; then
-            if [[ $( git rev-parse $BRANCH )  == $( git rev-parse $REMOTE/$BRANCH ) ]] ; then
-                echo "Your branch '$BRANCH' points to same commit as '$REMOTE/$BRANCH', doing nothing."
-                exit 4
-            else
-                echo "Dude..."
-                exit 42
-            fi
-    fi
-    if [[ -z $remote_ahead_local && -n $local_ahead_remote ]] ; then
-        echo "Your branch '$BRANCH'is ahead of '$REMOTE/$BRANCH', perhaps you want to push?"
-        exit 5
-    fi
-    if [[ -n $local_ahead_remote && -n $remote_ahead_local ]] ; then
-        echo "Your branches '$BRANCH' and '$REMOTE/$BRANCH' and have diverged, fast-forward not possible!"
-        exit 6
-    fi
-    if [[ -n $remote_ahead_local && -z $local_ahead_remote ]] ; then
-        echo "Fast-forward '$BRANCH' to '$REMOTE/$BRANCH'."
-        git merge --ff-only $REMOTE/$BRANCH
-        exit 0
-    fi
 fi
+}
+
+ff() {
+return
+}
+
+start_tracking() {
+return
+}
+
+stop_tracking() {
+return
+}
+
+review() {
+return
+}
 
 print_usage(){
-
 cat << END
 usage: git tracking [ff | start <ref> | stop | review]
 END
