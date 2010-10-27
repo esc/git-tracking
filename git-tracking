@@ -54,7 +54,6 @@ ff() {
 }
 
 parse_start_tracking() {
-    echo $@
     if [[ -z $2 ]] ; then
         print_usage
     fi
