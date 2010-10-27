@@ -52,9 +52,34 @@ ff() {
     fi
 }
 
-start_tracking() {
+parse_start_tracking() {
+    echo $@
+    if [[ -z $2 ]] ; then
+        print_usage
+    fi
+    if [[ -n $REMOTE ]] ; then
+        if [[ $2 == "--force" || $2 == "-f" ]] ; then
+            if [[ -z $2 ]] ; then
+                print_usage
+            else
+                stop_tracking
+                start_tracking $3
+            fi
+        else
+            echo "Your branch '$BRANCH' is already tracking '$REMOTE/$BRANCH'"
+            echo "Either use 'git tracking stop' first or --force(-f)."
+            exit
+        fi
+    fi
 }
 
+start_tracking(){
+    remote_branch=$( echo $1 | sed 's,^.*/,,')
+    new_remote=$( echo $1 | sed 's,/.*$,,')
+    git config branch.$BRANCH.remote $new_remote
+    git config branch.$BRANCH.merge $remote_branch
+    echo "Branch '$BRANCH' setup to track remote branch '$remote_branch' from '$new_remote'."
+}
 stop_tracking() {
     check_no_tracking
     git config --remove-section branch.$BRANCH
@@ -77,7 +102,7 @@ case $1 in
     "ff")
         ff ;;
     "start")
-        start_tracking ;;
+        parse_start_tracking $@ ;;
     "stop")
         stop_tracking ;;
     "review")
