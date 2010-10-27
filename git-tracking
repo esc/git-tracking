@@ -43,3 +43,24 @@ elif [[ -n $REMOTE && -n $( git config branch.$BRANCH.merge) ]] ; then
         exit 0
     fi
 fi
+
+print_usage(){
+
+cat << END
+usage: git tracking [ff | start <ref> | stop | review]
+END
+}
+
+case $1 in
+    "")
+    print_usage
+    "ff")
+        ff ;;
+    "start")
+        start_tracking ;;
+    "stop")
+        stop_tracking ;;
+    "review")
+    *)
+        print_usage $@ ;;
+esac
