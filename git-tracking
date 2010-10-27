@@ -73,7 +73,7 @@ END
 
 case $1 in
     "")
-    print_usage
+        print_usage ;;
     "ff")
         ff ;;
     "start")
@@ -81,6 +81,7 @@ case $1 in
     "stop")
         stop_tracking ;;
     "review")
+        review ;;
     *)
         print_usage $@ ;;
 esac
