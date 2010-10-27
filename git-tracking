@@ -15,11 +15,15 @@ elif [[ $BRANCH == '(no branch)' ]] ; then
 fi
 REMOTE=$( git config branch.$BRANCH.remote )
 
+check_no_tracking (){
+if [[ -z $REMOTE ]] ; then
+    echo "Your branch '$BRANCH' isn't tracking anything."
+    exit 3
+fi
+}
+
 ff() {
-    if [[ -z $REMOTE ]] ; then
-        echo "Your branch '$BRANCH' isn't tracking anything."
-        exit 3
-    fi
+    check_no_tracking
     if [[ -n $REMOTE && -n $( git config branch.$BRANCH.merge) ]] ; then
         remote_ahead_local=$( git log --oneline $BRANCH..$REMOTE/$BRANCH)
         local_ahead_remote=$( git log --oneline $REMOTE/$BRANCH..$BRANCH)
