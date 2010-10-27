@@ -71,15 +71,29 @@ parse_start_tracking() {
             exit
         fi
     fi
+    start_tracking $2
 }
 
 start_tracking(){
+    # TODO check for / in $1
     remote_branch=$( echo $1 | sed 's,^.*/,,')
     new_remote=$( echo $1 | sed 's,/.*$,,')
+    echo $remote_branch
+    echo $new_remote
+    # TODO not working
+    if [[ $( git remote | grep -q $new_remote ) ]]; then
+        echo "Remote '$new_remote' does not exist!"
+        exit
+    # TODO check not working
+    elif [[ $( git branch -r | grep -q '/refs'$new_remote'/'$remote_branch ) ]] ; then
+        echo "Remote '$new_remote' does not appear to have a branch '$remote_branch'"
+        exit
+    fi
     git config branch.$BRANCH.remote $new_remote
     git config branch.$BRANCH.merge $remote_branch
     echo "Branch '$BRANCH' setup to track remote branch '$remote_branch' from '$new_remote'."
 }
+
 stop_tracking() {
     check_no_tracking
     git config --remove-section branch.$BRANCH
