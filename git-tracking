@@ -1,4 +1,5 @@
 #!/bin/bash
+# Maintain local tracking braches
 # fast-forward local tracking branch if you get something like (on git checkout):
 # Your branch is behind 'origin/master' by 1 commit, and can be fast-forwarded.
 # Author: Valentin Haenel <valentin.haenel@gmx.de>
