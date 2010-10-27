@@ -56,7 +56,9 @@ start_tracking() {
 }
 
 stop_tracking() {
-return
+    check_no_tracking
+    git config --remove-section branch.$BRANCH
+    echo "Branch '$BRANCH' is no longer tracking '$REMOTE/$BRANCH"
 }
 
 review() {
