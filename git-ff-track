@@ -1,0 +1,44 @@
+#!/bin/bash
+# fast-forward local tracking branch if you get something like (on git checkout):
+# Your branch is behind 'origin/master' by 1 commit, and can be fast-forwarded.
+# Author: Valentin Haenel <valentin.haenel@gmx.de>
+# Licence: wtfpl <http://sam.zoy.org/wtfpl/>
+
+BRANCH=$( git branch | grep ^* | cut -f1 -d' ' --complement )
+if [[ -z $BRANCH ]] ; then
+    # not a git repository
+    exit 1
+elif [[ $BRANCH == '(no branch)' ]] ; then
+    echo 'You have a detached HEAD.'
+    exit 2
+fi
+REMOTE=$( git config branch.$BRANCH.remote )
+if [[ -n $BRANCH && -z $REMOTE ]] ; then
+    echo "Your branch '$BRANCH' isn't tracking anything."
+    exit 3
+elif [[ -n $REMOTE && -n $( git config branch.$BRANCH.merge) ]] ; then
+    remote_ahead_local=$( git log --oneline $BRANCH..$REMOTE/$BRANCH)
+    local_ahead_remote=$( git log --oneline $REMOTE/$BRANCH..$BRANCH)
+    if [[ -z $remote_ahead_local && -z $local_ahead_remote ]] ; then
+            if [[ $( git rev-parse $BRANCH )  == $( git rev-parse $REMOTE/$BRANCH ) ]] ; then
+                echo "Your branch '$BRANCH' points to same commit as '$REMOTE/$BRANCH', doing nothing."
+                exit 4
+            else
+                echo "Dude..."
+                exit 42
+            fi  
+    fi  
+    if [[ -z $remote_ahead_local && -n $local_ahead_remote ]] ; then
+        echo "Your branch '$BRANCH'is ahead of '$REMOTE/$BRANCH', perhaps you want to push?"
+        exit 5
+    fi  
+    if [[ -n $local_ahead_remote && -n $remote_ahead_local ]] ; then
+        echo "Your branches '$BRANCH' and '$REMOTE/$BRANCH' and have diverged, fast-forward not possible!"
+        exit 6
+    fi  
+    if [[ -n $remote_ahead_local && -z $local_ahead_remote ]] ; then
+        echo "Fast-forward '$BRANCH' to '$REMOTE/$BRANCH'."
+        git merge --ff-only $REMOTE/$BRANCH
+        exit 0
+    fi  
+fi
