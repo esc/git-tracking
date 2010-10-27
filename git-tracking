@@ -26,19 +26,19 @@ elif [[ -n $REMOTE && -n $( git config branch.$BRANCH.merge) ]] ; then
             else
                 echo "Dude..."
                 exit 42
-            fi  
-    fi  
+            fi
+    fi
     if [[ -z $remote_ahead_local && -n $local_ahead_remote ]] ; then
         echo "Your branch '$BRANCH'is ahead of '$REMOTE/$BRANCH', perhaps you want to push?"
         exit 5
-    fi  
+    fi
     if [[ -n $local_ahead_remote && -n $remote_ahead_local ]] ; then
         echo "Your branches '$BRANCH' and '$REMOTE/$BRANCH' and have diverged, fast-forward not possible!"
         exit 6
-    fi  
+    fi
     if [[ -n $remote_ahead_local && -z $local_ahead_remote ]] ; then
         echo "Fast-forward '$BRANCH' to '$REMOTE/$BRANCH'."
         git merge --ff-only $REMOTE/$BRANCH
         exit 0
-    fi  
+    fi
 fi
