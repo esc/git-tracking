@@ -58,19 +58,16 @@ parse_start_tracking() {
     if [[ -z $2 ]] ; then
         print_usage
     fi
-    if [[ -n $REMOTE ]] ; then
-        if [[ $2 == "--force" || $2 == "-f" ]] ; then
-            if [[ -z $2 ]] ; then
-                print_usage
-            else
-                stop_tracking
-                start_tracking $3
-            fi
-        else
-            echo "Your branch '$BRANCH' is already tracking '$REMOTE/$BRANCH'"
-            echo "Either use 'git tracking stop' first or --force(-f)."
-            exit
-        fi
+    if [[ $2 == "--force" || $2 == "-f" ]] ; then
+        FORCE=true
+        shift
+    fi
+    if [[ -n $REMOTE && -z $FORCE ]] ; then
+        echo "Your branch '$BRANCH' is already tracking '$REMOTE/$BRANCH'"
+        echo "Either use 'git tracking stop' first or --force(-f)."
+        exit
+    elif [[ -n $REMOTE && $FORCE ]] ; then
+        stop_tracking
     fi
     start_tracking $2
 }
@@ -84,18 +81,18 @@ start_tracking(){
     fi
     remote_branch=$( echo $1 | sed 's,^.*/,,')
     new_remote=$( echo $1 | sed 's,/.*$,,')
-    echo $new_remote'/'$remote_branch
     if [[ -z $( git remote | grep $new_remote) ]]  ;then
         echo "Can not start tracking, remote '$new_remote' does not exist!"
         exit
     fi
-    if [[ -n $( git branch -r | grep -q $new_remote/$remote_branch ) ]] ; then
+    if [[ -z $( git branch -r | grep $new_remote/$remote_branch ) ]] ; then
         echo "Can not start tracking, remote '$new_remote' does not appear to have a branch '$remote_branch'"
         exit
     fi
     git config branch.$BRANCH.remote $new_remote
     git config branch.$BRANCH.merge 'refs/heads/'$remote_branch
     echo "Branch '$BRANCH' setup to track remote branch '$remote_branch' from '$new_remote'."
+    exit 0
 }
 
 stop_tracking() {
