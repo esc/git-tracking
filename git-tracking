@@ -1,15 +1,20 @@
 #!/bin/bash
 # Maintain local tracking braches
-# fast-forward local tracking branch if you get something like (on git checkout):
-# Your branch is behind 'origin/master' by 1 commit, and can be fast-forwarded.
-# Author: Valentin Haenel <valentin.haenel@gmx.de>
+#
+# usage: git tracking start [--force|-f] <remote>/<branch>
+#    or: git tracking stop
+#    or: git tracking ff
+#    or: git tracking status
+#    or: git tracking review
+#
+# Author:  Valentin Haenel <valentin.haenel@gmx.de>
 # Licence: wtfpl <http://sam.zoy.org/wtfpl/>
 
 # detect branch names
 BRANCH=$( git branch | grep ^* | sed 's/^\* //' )
 if [[ -z $BRANCH ]] ; then
     # not a git repository
-    exit 1
+    exit 2
 elif [[ $BRANCH == '(no branch)' ]] ; then
     echo 'You have a detached HEAD.'
     exit 2
@@ -107,7 +112,7 @@ return
 
 print_usage(){
 cat << END
-usage: git tracking [ff | start <ref> | stop | review]
+usage: git tracking [ff | start [--force|-f] <remote>/<branch> | stop | status | review]
 END
 exit
 }
@@ -123,9 +128,9 @@ case $1 in
         stop_tracking ;;
     "status")
         # rewrite this and format output neater
-        git branch -vv ;;
+        git branch -vv ; exit 0;;
     "review")
         review ;;
-    *)
+    "-h" | *)
         print_usage $@ ;;
 esac
