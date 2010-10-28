@@ -15,6 +15,7 @@ elif [[ $BRANCH == '(no branch)' ]] ; then
     exit 2
 fi
 REMOTE=$( git config branch.$BRANCH.remote )
+REMOTE_BRANCH=$( git config branch.$BRANCH.merge | sed 's,^refs/heads/,,')
 
 check_no_tracking (){
 if [[ -z $REMOTE ]] ; then
@@ -97,7 +98,7 @@ start_tracking(){
 stop_tracking() {
     check_no_tracking
     git config --remove-section branch.$BRANCH
-    echo "Branch '$BRANCH' is no longer tracking '$REMOTE/$BRANCH'."
+    echo "Branch '$BRANCH' is no longer tracking '$REMOTE/$REMOTE_BRANCH'."
 }
 
 review() {
