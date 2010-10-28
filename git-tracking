@@ -121,6 +121,9 @@ case $1 in
         parse_start_tracking $@ ;;
     "stop")
         stop_tracking ;;
+    "status")
+        # rewrite this and format output neater
+        git branch -vv ;;
     "review")
         review ;;
     *)
