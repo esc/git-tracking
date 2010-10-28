@@ -76,22 +76,25 @@ parse_start_tracking() {
 }
 
 start_tracking(){
-    # TODO check for / in $1
+    if [[ $1 != */* ]]; then
+        echo "Remote tracking branch was not specified as <remote>/<branch>."
+        echo "Available remote tracking branches are:"
+        git branch -r
+        exit
+    fi
     remote_branch=$( echo $1 | sed 's,^.*/,,')
     new_remote=$( echo $1 | sed 's,/.*$,,')
-    echo $remote_branch
-    echo $new_remote
-    # TODO not working
-    if [[ $( git remote | grep -q $new_remote ) ]]; then
-        echo "Remote '$new_remote' does not exist!"
+    echo $new_remote'/'$remote_branch
+    if [[ -z $( git remote | grep $new_remote) ]]  ;then
+        echo "Can not start tracking, remote '$new_remote' does not exist!"
         exit
-    # TODO check not working
-    elif [[ $( git branch -r | grep -q '/refs'$new_remote'/'$remote_branch ) ]] ; then
-        echo "Remote '$new_remote' does not appear to have a branch '$remote_branch'"
+    fi
+    if [[ -n $( git branch -r | grep -q $new_remote/$remote_branch ) ]] ; then
+        echo "Can not start tracking, remote '$new_remote' does not appear to have a branch '$remote_branch'"
         exit
     fi
     git config branch.$BRANCH.remote $new_remote
-    git config branch.$BRANCH.merge $remote_branch
+    git config branch.$BRANCH.merge 'refs/heads/'$remote_branch
     echo "Branch '$BRANCH' setup to track remote branch '$remote_branch' from '$new_remote'."
 }
 
