@@ -132,6 +132,9 @@ case $1 in
         git branch -vv ; exit 0;;
     "review")
         review ;;
-    "-h" | *)
+    "-h")
         print_usage $@ ;;
+    *)
+        echo 'error: Unknown subcommand: '$1 ;
+        print_usage ;;
 esac
