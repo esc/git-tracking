@@ -108,7 +108,9 @@ stop_tracking() {
 }
 
 review() {
-exit 3
+    check_no_tracking
+    # TODO check that the remote tracking branch is actually ahead
+    git log $@ $BRANCH..$REMOTE/$BRANCH
 }
 
 print_usage(){
