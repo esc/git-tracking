@@ -84,7 +84,7 @@ start_tracking(){
         git branch -r
         exit 2
     fi
-    remote_branch=$( echo $1 | sed 's,^.*/,,')
+    remote_branch=$( echo $1 | sed 's_^[^/]*/__')
     new_remote=$( echo $1 | sed 's,/.*$,,')
     if [[ -z $( git remote | grep $new_remote) ]]  ;then
         echo "Can not start tracking, remote '$new_remote' does not exist!"
