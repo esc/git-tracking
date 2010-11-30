@@ -112,7 +112,7 @@ start_tracking(){
         croak "Can not start tracking, remote '$new_remote' does not exist!"
     fi
     if [[ -z $( git branch -r | grep -x "  $new_remote/$remote_branch" ) ]] ; then
-        croak "Can not start tracking, remote '$new_remote' does not appear to have a branch '$remote_branch'"
+        croak "Can not start tracking, remote '$new_remote' does not appear to have a branch '$remote_branch'."
     fi
     git config branch.$BRANCH.remote $new_remote
     git config branch.$BRANCH.merge 'refs/heads/'$remote_branch
