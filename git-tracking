@@ -63,7 +63,13 @@ if [[ -z $REMOTE ]] ; then
 fi
 }
 
-ff() {
+do_stop_tracking() {
+    check_no_tracking
+    git config --remove-section branch.$BRANCH
+    echo "Branch '$BRANCH' is no longer tracking '$REMOTE/$REMOTE_BRANCH'."
+}
+
+fast_forward_tracking() {
     check_no_tracking
     if [[ -n $REMOTE && -n $( git config branch.$BRANCH.merge) ]] ; then
         remote_ahead_local=$( git log --oneline $BRANCH..$REMOTE/$BRANCH)
@@ -93,25 +99,14 @@ ff() {
     fi
 }
 
-parse_start_tracking() {
-    if [[ -z $2 ]] ; then
-        print_usage
-    fi
-    if [[ $2 == "--force" || $2 == "-f" ]] ; then
-        FORCE=true
-        shift
-    fi
-    if [[ -n $REMOTE && -z $FORCE ]] ; then
+start_tracking(){
+    if [[ -n $REMOTE && -z $force ]] ; then
         echo "Your branch '$BRANCH' is already tracking '$REMOTE/$BRANCH'"
         echo "Either use 'git tracking stop' first or --force(-f)."
         exit 2
-    elif [[ -n $REMOTE && $FORCE ]] ; then
-        stop_tracking
+    elif [[ -n $REMOTE && $force ]] ; then
+        do_stop_tracking
     fi
-    start_tracking $2
-}
-
-start_tracking(){
     if [[ $1 != */* ]]; then
         echo "Remote tracking branch was not specified as <remote>/<branch>."
         echo "Available remote tracking branches are:"
@@ -135,9 +130,7 @@ start_tracking(){
 }
 
 stop_tracking() {
-    check_no_tracking
-    git config --remove-section branch.$BRANCH
-    echo "Branch '$BRANCH' is no longer tracking '$REMOTE/$REMOTE_BRANCH'."
+    do_stop_tracking
     exit 0
 }
 
