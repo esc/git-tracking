@@ -113,11 +113,10 @@ start_tracking(){
     fi
     remote_branch=$( echo $1 | sed 's_^[^/]*/__')
     new_remote=$( echo $1 | sed 's,/.*$,,')
-    # TODO will match prefix too
-    if [[ -z $( git remote | grep $new_remote) ]]  ;then
+    if [[ -z $( git remote | grep  -x $new_remote) ]]  ;then
         croak "Can not start tracking, remote '$new_remote' does not exist!"
     fi
-    if [[ -z $( git branch -r | grep $new_remote/$remote_branch ) ]] ; then
+    if [[ -z $( git branch -r | grep -x $new_remote/$remote_branch ) ]] ; then
         croak "Can not start tracking, remote '$new_remote' does not appear to have a branch '$remote_branch'"
     fi
     git config branch.$BRANCH.remote $new_remote
