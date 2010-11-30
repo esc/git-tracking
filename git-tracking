@@ -48,57 +48,57 @@ finish() {
     exit 1
 }
 
-BRANCH=$( git branch | grep ^* | sed 's/^\* //' )
-if [[ $BRANCH == '(no branch)' ]] ; then
+branch=$( git branch | grep ^* | sed 's/^\* //' )
+if [[ $branch == '(no branch)' ]] ; then
     croak 'You have a detached HEAD, this can not track anything.'
 fi
-REMOTE=$( git config branch.$BRANCH.remote )
-REMOTE_BRANCH=$( git config branch.$BRANCH.merge | sed 's,^refs/heads/,,')
+remote=$( git config branch.$branch.remote )
+remote_branch=$( git config branch.$branch.merge | sed 's,^refs/heads/,,')
 
 check_no_tracking (){
-if [[ -z $REMOTE ]] ; then
-    croak "Your branch '$BRANCH' isn't tracking anything."
+if [[ -z $remote ]] ; then
+    croak "Your branch '$branch' isn't tracking anything."
 fi
 }
 
 do_stop_tracking() {
     check_no_tracking
-    git config --remove-section branch.$BRANCH
-    echo "Branch '$BRANCH' is no longer tracking '$REMOTE/$REMOTE_BRANCH'."
+    git config --remove-section branch.$branch
+    echo "Branch '$branch' is no longer tracking '$remote/$remote_branch'."
 }
 
 fast_forward_tracking() {
     check_no_tracking
-    if [[ -n $REMOTE && -n $( git config branch.$BRANCH.merge) ]] ; then
-        remote_ahead_local=$( git log --oneline $BRANCH..$REMOTE/$BRANCH)
-        local_ahead_remote=$( git log --oneline $REMOTE/$BRANCH..$BRANCH)
+    if [[ -n $remote && -n $( git config branch.$branch.merge) ]] ; then
+        remote_ahead_local=$( git log --oneline $branch..$remote/$branch)
+        local_ahead_remote=$( git log --oneline $remote/$branch..$branch)
         if [[ -z $remote_ahead_local && -z $local_ahead_remote ]] ; then
-                if [[ $( git rev-parse $BRANCH )  == $( git rev-parse $REMOTE/$BRANCH ) ]] ; then
-                    croak "Your branch '$BRANCH' points to same commit as '$REMOTE/$BRANCH', doing nothing."
+                if [[ $( git rev-parse $branch )  == $( git rev-parse $remote/$branch ) ]] ; then
+                    croak "Your branch '$branch' points to same commit as '$remote/$branch', doing nothing."
                 else
                     echo "Dude..."
                     exit 42
                 fi
         fi
         if [[ -z $remote_ahead_local && -n $local_ahead_remote ]] ; then
-            croak "Your branch '$BRANCH'is ahead of '$REMOTE/$BRANCH', perhaps you want to push?"
+            croak "Your branch '$branch'is ahead of '$remote/$branch', perhaps you want to push?"
         fi
         if [[ -n $local_ahead_remote && -n $remote_ahead_local ]] ; then
-            croak "Your branches '$BRANCH' and '$REMOTE/$BRANCH' and have diverged, fast-forward not possible!"
+            croak "Your branches '$branch' and '$remote/$branch' and have diverged, fast-forward not possible!"
         fi
         if [[ -n $remote_ahead_local && -z $local_ahead_remote ]] ; then
-            echo "Fast-forward '$BRANCH' to '$REMOTE/$BRANCH'."
-            git merge --ff-only $REMOTE/$BRANCH
+            echo "Fast-forward '$branch' to '$remote/$branch'."
+            git merge --ff-only $remote/$branch
             exit 0
         fi
     fi
 }
 
 start_tracking(){
-    if [[ -n $REMOTE && -z $force ]] ; then
-        croak "Your branch '$BRANCH' is already tracking '$REMOTE/$BRANCH'\n"\
+    if [[ -n $remote && -z $force ]] ; then
+        croak "Your branch '$branch' is already tracking '$remote/$branch'\n"\
               "Either use 'git tracking stop' first or use --force(-f)."
-    elif [[ -n $REMOTE && $force ]] ; then
+    elif [[ -n $remote && $force ]] ; then
         do_stop_tracking
     fi
     if [[ $1 != */* ]]; then
@@ -114,9 +114,9 @@ start_tracking(){
     if [[ -z $( git branch -r | grep -x "  $new_remote/$remote_branch" ) ]] ; then
         croak "Can not start tracking, remote '$new_remote' does not appear to have a branch '$remote_branch'."
     fi
-    git config branch.$BRANCH.remote $new_remote
-    git config branch.$BRANCH.merge 'refs/heads/'$remote_branch
-    echo "Branch '$BRANCH' setup to track remote branch '$remote_branch' from '$new_remote'."
+    git config branch.$branch.remote $new_remote
+    git config branch.$branch.merge 'refs/heads/'$remote_branch
+    echo "Branch '$branch' setup to track remote branch '$remote_branch' from '$new_remote'."
     exit 0
 }
 
@@ -128,7 +128,7 @@ stop_tracking() {
 review_tracking() {
     check_no_tracking
     # TODO check that the remote tracking branch is actually ahead
-    git log $@ $BRANCH..$REMOTE/$BRANCH
+    git log $@ $branch..$remote/$branch
 }
 
 status_tracking(){
