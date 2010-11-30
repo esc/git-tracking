@@ -76,20 +76,17 @@ fast_forward_tracking() {
         local_ahead_remote=$( git log --oneline $REMOTE/$BRANCH..$BRANCH)
         if [[ -z $remote_ahead_local && -z $local_ahead_remote ]] ; then
                 if [[ $( git rev-parse $BRANCH )  == $( git rev-parse $REMOTE/$BRANCH ) ]] ; then
-                    echo "Your branch '$BRANCH' points to same commit as '$REMOTE/$BRANCH', doing nothing."
-                    exit 2
+                    croak "Your branch '$BRANCH' points to same commit as '$REMOTE/$BRANCH', doing nothing."
                 else
                     echo "Dude..."
                     exit 42
                 fi
         fi
         if [[ -z $remote_ahead_local && -n $local_ahead_remote ]] ; then
-            echo "Your branch '$BRANCH'is ahead of '$REMOTE/$BRANCH', perhaps you want to push?"
-            exit 2
+            croak "Your branch '$BRANCH'is ahead of '$REMOTE/$BRANCH', perhaps you want to push?"
         fi
         if [[ -n $local_ahead_remote && -n $remote_ahead_local ]] ; then
-            echo "Your branches '$BRANCH' and '$REMOTE/$BRANCH' and have diverged, fast-forward not possible!"
-            exit 2
+            croak "Your branches '$BRANCH' and '$REMOTE/$BRANCH' and have diverged, fast-forward not possible!"
         fi
         if [[ -n $remote_ahead_local && -z $local_ahead_remote ]] ; then
             echo "Fast-forward '$BRANCH' to '$REMOTE/$BRANCH'."
