@@ -41,25 +41,25 @@ command="$1"
 shift
 
 croak() {
-    die "error: $@"
+    echo -e "error: $@"
+    exit 1
 }
 
-# detect branch names
+finish() {
+    echo -e "Done: $@"
+    exit 1
+}
+
 BRANCH=$( git branch | grep ^* | sed 's/^\* //' )
-if [[ -z $BRANCH ]] ; then
-    # not a git repository
-    exit 2
-elif [[ $BRANCH == '(no branch)' ]] ; then
-    echo 'You have a detached HEAD.'
-    exit 2
+if [[ $BRANCH == '(no branch)' ]] ; then
+    croak 'You have a detached HEAD, this can not track anything.'
 fi
 REMOTE=$( git config branch.$BRANCH.remote )
 REMOTE_BRANCH=$( git config branch.$BRANCH.merge | sed 's,^refs/heads/,,')
 
 check_no_tracking (){
 if [[ -z $REMOTE ]] ; then
-    echo "Your branch '$BRANCH' isn't tracking anything."
-    exit 2
+    croak "Your branch '$BRANCH' isn't tracking anything."
 fi
 }
 
@@ -101,27 +101,24 @@ fast_forward_tracking() {
 
 start_tracking(){
     if [[ -n $REMOTE && -z $force ]] ; then
-        echo "Your branch '$BRANCH' is already tracking '$REMOTE/$BRANCH'"
-        echo "Either use 'git tracking stop' first or --force(-f)."
-        exit 2
+        croak "Your branch '$BRANCH' is already tracking '$REMOTE/$BRANCH'\n"\
+              "Either use 'git tracking stop' first or use --force(-f)."
     elif [[ -n $REMOTE && $force ]] ; then
         do_stop_tracking
     fi
     if [[ $1 != */* ]]; then
-        echo "Remote tracking branch was not specified as <remote>/<branch>."
-        echo "Available remote tracking branches are:"
-        git branch -r
-        exit 2
+        croak "Remote tracking branch was not specified as <remote>/<branch>.\n"\
+              "Available remote branches are:\n"\
+              $( git branch -r )
     fi
     remote_branch=$( echo $1 | sed 's_^[^/]*/__')
     new_remote=$( echo $1 | sed 's,/.*$,,')
+    # TODO will match prefix too
     if [[ -z $( git remote | grep $new_remote) ]]  ;then
-        echo "Can not start tracking, remote '$new_remote' does not exist!"
-        exit 2
+        croak "Can not start tracking, remote '$new_remote' does not exist!"
     fi
     if [[ -z $( git branch -r | grep $new_remote/$remote_branch ) ]] ; then
-        echo "Can not start tracking, remote '$new_remote' does not appear to have a branch '$remote_branch'"
-        exit 2
+        croak "Can not start tracking, remote '$new_remote' does not appear to have a branch '$remote_branch'"
     fi
     git config branch.$BRANCH.remote $new_remote
     git config branch.$BRANCH.merge 'refs/heads/'$remote_branch
@@ -150,7 +147,7 @@ case "$command" in
     stop|fast-forward|status|review)
         [[ $force -gt 0 ]] && croak "[-f|--force] can only be used with 'start'";;
     start) ;;
-    *) croak "unknown command '$command'" ;;
+    *) croak "Unknown command '$command'" ;;
 esac
 
 $command"_tracking" "$@"
