@@ -1,14 +1,48 @@
 #!/bin/bash
 # Maintain local tracking braches
-#
-# usage: git tracking start [--force|-f] <remote>/<branch>
-#    or: git tracking stop
-#    or: git tracking ff
-#    or: git tracking status
-#    or: git tracking review
-#
+
 # Author:  Valentin Haenel <valentin.haenel@gmx.de>
 # Licence: wtfpl <http://sam.zoy.org/wtfpl/>
+
+# use shUnit
+
+if [ $# -eq 0 ]; then
+    set -- -h
+fi
+
+OPTS_SPEC="\
+git tracking start [--force|-f] <remote>/<branch>
+git tracking stop
+git tracking fast-forward
+git tracking status
+git tracking review
+--
+h,help        show the help
+ options for 'start'
+f,force       implies stop tracking first
+"
+
+eval "$(echo "$OPTS_SPEC" | git rev-parse --parseopt -- "$@" || echo exit $?)"
+
+echo "Options: $*"
+
+. $(git --exec-path)/git-sh-setup
+
+while [ $# -gt 0 ]; do
+    opt="$1"
+    shift
+    case "$opt" in
+        -f) force=1 ;;
+        --) break ;;
+    esac
+done
+
+command="$1"
+shift
+
+croak() {
+    die "error: $@"
+}
 
 # detect branch names
 BRANCH=$( git branch | grep ^* | sed 's/^\* //' )
@@ -107,36 +141,23 @@ stop_tracking() {
     exit 0
 }
 
-review() {
+review_tracking() {
     check_no_tracking
     # TODO check that the remote tracking branch is actually ahead
     git log $@ $BRANCH..$REMOTE/$BRANCH
 }
 
-print_usage(){
-cat << END
-usage: git tracking [ff | start [--force|-f] <remote>/<branch> | stop | status | review]
-END
-exit 1
+status_tracking(){
+    #rewrite this and format output neater
+    git branch -vv
+    exit 0
 }
 
-case $1 in
-    "")
-        print_usage ;;
-    "ff")
-        ff ;;
-    "start")
-        parse_start_tracking $@ ;;
-    "stop")
-        stop_tracking ;;
-    "status")
-        # rewrite this and format output neater
-        git branch -vv ; exit 0;;
-    "review")
-        review ;;
-    "-h")
-        print_usage $@ ;;
-    *)
-        echo 'error: Unknown subcommand: '$1 ;
-        print_usage ;;
+case "$command" in
+    stop|fast-forward|status|review)
+        [[ $force -gt 0 ]] && croak "[-f|--force] can only be used with 'start'";;
+    start) ;;
+    *) croak "unknown command '$command'" ;;
 esac
+
+$command"_tracking" "$@"
