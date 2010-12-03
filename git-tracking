@@ -24,7 +24,7 @@ f,force       implies 'tracking stop' first
 
 eval "$(echo "$OPTS_SPEC" | git rev-parse --parseopt -- "$@" || echo exit $?)"
 
-. $(git --exec-path)/git-sh-setup
+#. $(git --exec-path)/git-sh-setup
 
 while [ $# -gt 0 ]; do
     opt="$1"
