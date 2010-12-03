@@ -19,7 +19,7 @@ git tracking review
 --
 h,help        show the help
  options for 'start'
-f,force       implies stop tracking first
+f,force       implies 'tracking stop' first
 "
 
 eval "$(echo "$OPTS_SPEC" | git rev-parse --parseopt -- "$@" || echo exit $?)"
