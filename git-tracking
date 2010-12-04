@@ -67,7 +67,7 @@ do_stop_tracking() {
     echo "Branch '$branch' is no longer tracking '$remote/$remote_branch'."
 }
 
-fast_forward_tracking() {
+fast-forward_tracking() {
     check_no_tracking
     if [[ -n $remote && -n $( git config branch.$branch.merge) ]] ; then
         remote_ahead_local=$( git log --oneline $branch..$remote/$branch)
